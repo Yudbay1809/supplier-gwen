@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Boxes, ArrowLeft, RefreshCcw, Search, ShieldCheck, ShieldX, Store, Warehouse } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -16,10 +16,10 @@ const statusStyle: Record<StockVariant["status"], { bg: string; text: string }> 
   Habis: { bg: "bg-danger-soft", text: "text-danger" },
 };
 
-export default function StockPage() {
+function StockPageContent() {
   const searchParams = useSearchParams();
-  const [query, setQuery] = useState("");
-  const [brandFilter, setBrandFilter] = useState("Semua");
+  const [query, setQuery] = useState(() => searchParams.get("search") ?? "");
+  const [brandFilter, setBrandFilter] = useState(() => searchParams.get("brand") ?? "Semua");
   const [statusFilter, setStatusFilter] = useState<StockVariant["status"] | "Semua">("Semua");
   const [warehouseFilter, setWarehouseFilter] = useState("Semua");
   const [sortBy, setSortBy] = useState<"qty-asc" | "qty-desc">("qty-asc");
@@ -67,17 +67,6 @@ export default function StockPage() {
         : <span key={`${part}-${index}`}>{part}</span>
     ));
   };
-
-  useEffect(() => {
-    const search = searchParams.get("search") ?? "";
-    const brand = searchParams.get("brand") ?? "Semua";
-    if (search) {
-      setQuery(search);
-    }
-    if (brandOptions.includes(brand)) {
-      setBrandFilter(brand);
-    }
-  }, [searchParams, brandOptions]);
 
   return (
     <AuthGuard>
@@ -431,5 +420,13 @@ export default function StockPage() {
         <Footer />
       </div>
     </AuthGuard>
+  );
+}
+
+export default function StockPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F2FFFD]" />}>
+      <StockPageContent />
+    </Suspense>
   );
 }

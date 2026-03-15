@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   BadgeCheck,
-  BadgeX,
   CheckCircle2,
   Circle,
   Clock3,
@@ -30,9 +29,9 @@ const statusStyle: Record<KontrabonStatus, { bg: string; text: string }> = {
   Dibayar: { bg: "bg-brand-light", text: "text-brand" },
 };
 
-export default function KontrabonPage() {
+function KontrabonPageContent() {
   const searchParams = useSearchParams();
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(() => searchParams.get("search") ?? "");
   const [statusFilter, setStatusFilter] = useState<KontrabonStatus | "Semua">("Semua");
   const [vendorFilter, setVendorFilter] = useState("Semua");
   const [brandFilter, setBrandFilter] = useState("Semua");
@@ -83,13 +82,6 @@ export default function KontrabonPage() {
 
   const timelineSteps: KontrabonStatus[] = ["Draft", "Proses", "Approved", "Dibayar"];
   const timelineIconClass = "h-4 w-4";
-
-  useEffect(() => {
-    const search = searchParams.get("search") ?? "";
-    if (search) {
-      setQuery(search);
-    }
-  }, [searchParams]);
 
   return (
     <AuthGuard>
@@ -419,5 +411,13 @@ export default function KontrabonPage() {
         <Footer />
       </div>
     </AuthGuard>
+  );
+}
+
+export default function KontrabonPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F2FFFD]" />}>
+      <KontrabonPageContent />
+    </Suspense>
   );
 }
