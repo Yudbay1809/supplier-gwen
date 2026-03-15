@@ -4,15 +4,17 @@
 
 ## Demo
 
-![Dashboard](docs/screenshots/dashboard.png)
+| Dashboard | Kontrabon |
+| --- | --- |
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Kontrabon](docs/screenshots/kontrabon.png) |
 
-![Kontrabon](docs/screenshots/kontrabon.png)
+| Stok | Promosi |
+| --- | --- |
+| ![Stok](docs/screenshots/stock.png) | ![Promosi](docs/screenshots/promosi.png) |
 
-![Stok](docs/screenshots/stock.png)
-
-![Promosi](docs/screenshots/promosi.png)
-
-![Login](docs/screenshots/login.png)
+| Login |  |
+| --- | --- |
+| ![Login](docs/screenshots/login.png) |  |
 
 Aplikasi supplier untuk monitoring stok per brand, kontrabon, dan promosi.
 
