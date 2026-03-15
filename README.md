@@ -2,6 +2,10 @@
 
 ![CI](https://github.com/Yudbay1809/supplier-gwen/actions/workflows/ci.yml/badge.svg)
 
+## Demo
+
+Tambahkan screenshot demo di sini (mis. `docs/screenshots/dashboard.png`).
+
 Aplikasi supplier untuk monitoring stok per brand, kontrabon, dan promosi.
 
 ## Slogan
@@ -67,6 +71,20 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 1. Build aplikasi: `npm run build`
 2. Jalankan: `npm run start`
+
+## Roadmap
+
+- Integrasi API kontrabon & stok (real data)
+- Notifikasi real (email/WA/in-app)
+- Analytics kampanye untuk supplier
+
+## Contributing
+
+Kontribusi terbuka. Buat branch baru, lakukan perubahan, lalu ajukan Pull Request.
+
+## License
+
+MIT
 
 ## Struktur Utama
 
