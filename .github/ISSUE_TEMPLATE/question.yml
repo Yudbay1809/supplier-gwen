@@ -1,0 +1,11 @@
+name: Question
+about: Pertanyaan terkait penggunaan
+labels: [question]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Pertanyaan
+      description: Tulis pertanyaanmu di sini.
+    validations:
+      required: true

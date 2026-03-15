@@ -1,0 +1,37 @@
+name: Bug report
+about: Laporkan bug agar bisa diperbaiki
+labels: [bug]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Ringkasan
+      description: Jelaskan bug secara singkat.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Langkah reproduksi
+      description: Tulis langkah-langkah untuk memunculkan bug.
+      placeholder: |
+        1. Buka ...
+        2. Klik ...
+        3. Lihat error ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ekspektasi
+      description: Apa hasil yang seharusnya terjadi?
+  - type: textarea
+    id: actual
+    attributes:
+      label: Hasil aktual
+      description: Apa yang terjadi sekarang?
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: Versi browser, OS, dan informasi relevan lainnya.

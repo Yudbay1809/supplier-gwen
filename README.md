@@ -95,11 +95,11 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 ## Contributing
 
-Kontribusi terbuka. Buat branch baru, lakukan perubahan, lalu ajukan Pull Request.
+Lihat [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
-MIT
+MIT. Lihat [LICENSE](LICENSE).
 
 ## Struktur Utama
 

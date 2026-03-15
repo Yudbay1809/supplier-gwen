@@ -1,0 +1,26 @@
+name: Feature request
+about: Usulan fitur baru
+labels: [enhancement]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Ringkasan
+      description: Jelaskan fitur yang diinginkan.
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Masalah yang diselesaikan
+      description: Kenapa fitur ini penting?
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solusi yang diusulkan
+      description: Bagaimana menurut kamu implementasinya?
+  - type: textarea
+    id: impact
+    attributes:
+      label: Dampak
+      description: Siapa yang akan terbantu?
