@@ -1,0 +1,31 @@
+{
+  "name": "Supplier Gwen",
+  "short_name": "Supplier Gwen",
+  "description": "Platform sewa media promosi untuk brand Anda.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F2FFFD",
+  "theme_color": "#2EC9B7",
+  "icons": [
+    {
+      "src": "/brand/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/brand/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/brand/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/brand/pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
