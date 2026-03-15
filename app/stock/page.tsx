@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { Boxes, ArrowLeft, RefreshCcw, Search, ShieldCheck, ShieldX, Store, Warehouse } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "../components/Navbar";
@@ -84,7 +85,12 @@ export default function StockPage() {
         <Navbar />
 
         <div className="mx-auto max-w-[1100px] px-4 py-8 sm:px-8 lg:px-10">
-          <div className="mb-6 flex items-center gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="mb-6 flex items-center gap-4"
+          >
             <Link href="/dashboard" className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm">
               <ArrowLeft className="h-5 w-5 text-ink" />
             </Link>
@@ -96,9 +102,14 @@ export default function StockPage() {
                 Ketersediaan Varian Produk
               </h1>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="mb-6 grid gap-4 md:grid-cols-3">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.05 }}
+            className="mb-6 grid gap-4 md:grid-cols-3"
+          >
             <div className="rounded-[24px] bg-white/90 p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <p className="text-xs uppercase tracking-[0.2em] text-brand-dark font-inter">Total brand</p>
@@ -144,9 +155,14 @@ export default function StockPage() {
                 Terhubung
               </span>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="mb-6 grid gap-4 md:grid-cols-3">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="mb-6 grid gap-4 md:grid-cols-3"
+          >
             <div className="rounded-[24px] bg-white/90 p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <p className="text-xs uppercase tracking-[0.2em] text-brand-dark font-inter">Status aman</p>
@@ -192,9 +208,14 @@ export default function StockPage() {
                 Habis
               </span>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="mb-6 rounded-[24px] bg-white/90 p-5 shadow-sm overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.15 }}
+            className="mb-6 rounded-[24px] bg-white/90 p-5 shadow-sm overflow-hidden"
+          >
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:min-w-0">
               <div className="relative w-full min-w-[220px] md:w-[360px] md:flex-none">
                 <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -267,20 +288,25 @@ export default function StockPage() {
                 <span className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-white/90 to-transparent" />
               </div>
             </div>
-          </div>
+          </motion.div>
 
           <div className="space-y-6">
             {filteredBrands.every((brand) => brand.variants.length === 0) && (
-              <div className="rounded-[24px] border border-dashed border-gray-200 bg-white/90 p-8 text-center shadow-sm">
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="rounded-[24px] border border-dashed border-gray-200 bg-white/90 p-8 text-center shadow-sm"
+              >
                 <p className="text-lg font-poppins text-ink">
                   Tidak ada stok yang cocok dengan filter.
                 </p>
                 <p className="mt-2 text-sm text-muted-foreground font-inter">
                   Coba ubah kata kunci, status, atau gudang yang dipilih.
                 </p>
-              </div>
+              </motion.div>
             )}
-            {filteredBrands.map((brand) => {
+            {filteredBrands.map((brand, index) => {
               const brandSource = stockData.find((item) => item.brand === brand.brand) ?? brand;
               const statusCounts = brandSource.variants.reduce(
                 (acc, variant) => {
@@ -291,7 +317,13 @@ export default function StockPage() {
               );
               const totalVariants = statusCounts.Aman + statusCounts.Menipis + statusCounts.Habis || 1;
               return (
-              <div key={brand.brand} className="rounded-[28px] border border-white/80 bg-white/90 p-6 shadow-sm">
+              <motion.div
+                key={brand.brand}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: Math.min(index * 0.05, 0.2) }}
+                className="rounded-[28px] border border-white/80 bg-white/90 p-6 shadow-sm"
+              >
                 <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E7FBF7]">
@@ -390,7 +422,7 @@ export default function StockPage() {
                     ))
                   )}
                 </div>
-              </div>
+              </motion.div>
             );
             })}
           </div>

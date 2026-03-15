@@ -1,10 +1,19 @@
 # Supplier Gwen
 
+![CI](https://github.com/Yudbay1809/supplier-gwen/actions/workflows/ci.yml/badge.svg)
+
 Aplikasi supplier untuk monitoring stok per brand, kontrabon, dan promosi.
 
 ## Slogan
 
 Pantau stok, kontrabon, dan promosi dalam satu dashboard.
+
+## Tech Stack
+
+- Next.js (App Router)
+- React + TypeScript
+- Tailwind CSS
+- Framer Motion
 
 ## Fitur
 

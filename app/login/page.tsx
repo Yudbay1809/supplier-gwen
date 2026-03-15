@@ -16,7 +16,8 @@ function LoginPageContent() {
     event.preventDefault();
     login(email);
     const next = searchParams.get("next");
-    router.push(next || "/dashboard");
+    const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+    router.push(safeNext || "/dashboard");
   };
 
   return (
