@@ -1,6 +1,6 @@
 # Supplier Gwen
 
-![CI](https://github.com/Yudbay1809/supplier-gwen/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/Yudbay1809/supplier-gwen/actions/workflows/ci.yml/badge.svg?branch=main)
 
 ## Demo
 
