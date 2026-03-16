@@ -135,6 +135,22 @@ h4 {
 }
 
 @layer components {
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 16px;
+    z-index: 100;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #0e5e56;
+    box-shadow: 0 10px 24px rgba(46, 201, 183, 0.2);
+  }
+
+  .skip-link:focus {
+    top: 16px;
+  }
+
   .page-wrap {
     @apply mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-[120px];
   }

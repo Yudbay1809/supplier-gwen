@@ -17,6 +17,8 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  applicationName: "Supplier Gwen",
+  keywords: ["supplier", "kontrabon", "stok", "promosi", "gwen", "dashboard"],
   title: {
     default: "Supplier Gwen",
     template: "%s | Supplier Gwen",
@@ -72,7 +74,12 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className={`${inter.variable} ${poppins.variable} antialiased`}>
-        {children}
+        <a href="#main-content" className="skip-link">
+          Lewati ke konten utama
+        </a>
+        <main id="main-content">
+          {children}
+        </main>
       </body>
     </html>
   );

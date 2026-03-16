@@ -237,6 +237,7 @@ export default function Navbar() {
               onChange={(event) => setSearchQuery(event.target.value)}
               onFocus={() => setShowSuggestions(true)}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
+              aria-label="Pencarian global"
               className="h-10 w-full rounded-lg border-none bg-gray-50 pl-10 pr-4 font-inter outline-none"
             />
             {showSuggestions && suggestions.length > 0 && (
@@ -333,6 +334,7 @@ export default function Navbar() {
                 onChange={(event) => setSearchQuery(event.target.value)}
                 onFocus={() => setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
+                aria-label="Pencarian global"
                 className="h-10 w-full rounded-lg border border-gray-200 bg-white pl-9 pr-3 text-sm font-inter outline-none"
               />
               {showSuggestions && suggestions.length > 0 && (
