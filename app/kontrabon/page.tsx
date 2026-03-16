@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useDeferredValue, useMemo, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   BadgeCheck,
@@ -21,6 +21,8 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import AuthGuard from "../components/AuthGuard";
 import { kontrabonData, type KontrabonStatus } from "../data/kontrabon";
+import { KontrabonCardSkeleton, SummaryCardSkeleton } from "../components/LoadingSkeleton";
+import { getMockLoadState, initMockLoad, resetMockLoad, subscribeMockLoad } from "../lib/mockLoaders";
 
 const statusStyle: Record<KontrabonStatus, { bg: string; text: string }> = {
   Draft: { bg: "bg-teal-soft", text: "text-teal" },
@@ -29,14 +31,37 @@ const statusStyle: Record<KontrabonStatus, { bg: string; text: string }> = {
   Dibayar: { bg: "bg-brand-light", text: "text-brand" },
 };
 
+const KONTRABON_MOCK_KEY = "kontrabon";
+initMockLoad(KONTRABON_MOCK_KEY, 700, false);
+
 function KontrabonPageContent() {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [query, setQuery] = useState(() => searchParams.get("search") ?? "");
-  const [statusFilter, setStatusFilter] = useState<KontrabonStatus | "Semua">("Semua");
-  const [vendorFilter, setVendorFilter] = useState("Semua");
-  const [brandFilter, setBrandFilter] = useState("Semua");
-  const [periodFilter, setPeriodFilter] = useState("Semua");
-  const [sortBy, setSortBy] = useState<"due" | "amount">("due");
+  const storedFilters = (() => {
+    if (typeof window === "undefined") return {};
+    try {
+      return JSON.parse(localStorage.getItem("kontrabon_filters") || "{}");
+    } catch {
+      return {};
+    }
+  })();
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get("search") ?? storedFilters.search ?? "");
+  const [statusFilter, setStatusFilter] = useState<KontrabonStatus | "Semua">(
+    () => (searchParams.get("status") as KontrabonStatus) ?? storedFilters.status ?? "Semua"
+  );
+  const [vendorFilter, setVendorFilter] = useState(() => searchParams.get("vendor") ?? storedFilters.vendor ?? "Semua");
+  const [brandFilter, setBrandFilter] = useState(() => searchParams.get("brand") ?? storedFilters.brand ?? "Semua");
+  const [periodFilter, setPeriodFilter] = useState(() => searchParams.get("period") ?? storedFilters.period ?? "Semua");
+  const [sortBy, setSortBy] = useState<"due" | "amount">(
+    () => (searchParams.get("sort") as "due" | "amount") ?? storedFilters.sort ?? "due"
+  );
+  const deferredQuery = useDeferredValue(searchQuery);
+  const loadState = useSyncExternalStore(
+    (listener) => subscribeMockLoad(KONTRABON_MOCK_KEY, listener),
+    () => getMockLoadState(KONTRABON_MOCK_KEY),
+    () => "loading"
+  );
 
   const vendors = useMemo(
     () => ["Semua", ...Array.from(new Set(kontrabonData.map((item) => item.vendor)))],
@@ -55,7 +80,7 @@ function KontrabonPageContent() {
     const filteredItems = kontrabonData.filter((item) => {
       const matchesQuery = `${item.id} ${item.vendor} ${item.brand} ${item.period}`
         .toLowerCase()
-        .includes(query.toLowerCase());
+        .includes(deferredQuery.toLowerCase());
       const matchesStatus = statusFilter === "Semua" ? true : item.status === statusFilter;
       const matchesVendor = vendorFilter === "Semua" ? true : item.vendor === vendorFilter;
       const matchesBrand = brandFilter === "Semua" ? true : item.brand === brandFilter;
@@ -68,7 +93,7 @@ function KontrabonPageContent() {
       }
       return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
     });
-  }, [query, statusFilter, vendorFilter, brandFilter, periodFilter, sortBy]);
+  }, [deferredQuery, statusFilter, vendorFilter, brandFilter, periodFilter, sortBy]);
 
   const summaryBase = periodFilter === "Semua"
     ? kontrabonData
@@ -82,6 +107,33 @@ function KontrabonPageContent() {
 
   const timelineSteps: KontrabonStatus[] = ["Draft", "Proses", "Approved", "Dibayar"];
   const timelineIconClass = "h-4 w-4";
+
+  const updateParams = (updates: Record<string, string>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    Object.entries(updates).forEach(([key, value]) => {
+      if (!value || value === "Semua") {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    });
+    const next = params.toString();
+    router.replace(next ? `${pathname}?${next}` : pathname);
+  };
+
+  const persistFilters = (next: Record<string, string>) => {
+    if (typeof window === "undefined") return;
+    const payload = {
+      search: searchQuery,
+      status: statusFilter,
+      vendor: vendorFilter,
+      brand: brandFilter,
+      period: periodFilter,
+      sort: sortBy,
+      ...next,
+    };
+    localStorage.setItem("kontrabon_filters", JSON.stringify(payload));
+  };
 
   return (
     <AuthGuard>
@@ -114,6 +166,14 @@ function KontrabonPageContent() {
             transition={{ duration: 0.4, delay: 0.05 }}
             className="mb-6 grid gap-4 md:grid-cols-3"
           >
+            {loadState !== "ready" ? (
+              <>
+                <SummaryCardSkeleton />
+                <SummaryCardSkeleton />
+                <SummaryCardSkeleton />
+              </>
+            ) : (
+              <>
             <div className="rounded-[24px] bg-white/90 p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <p className="text-xs uppercase tracking-[0.2em] text-brand-dark font-inter">Pending bulan ini</p>
@@ -168,6 +228,8 @@ function KontrabonPageContent() {
                 Paid
               </span>
             </div>
+              </>
+            )}
           </motion.div>
 
           <motion.div
@@ -181,8 +243,13 @@ function KontrabonPageContent() {
                 <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="text"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
+                  value={searchQuery}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setSearchQuery(value);
+                    updateParams({ search: value });
+                    persistFilters({ search: value });
+                  }}
                   placeholder="Cari ID, vendor, brand, periode..."
                   className="h-12 w-full rounded-2xl border border-gray-200 bg-white pl-11 pr-4 text-sm font-inter"
                 />
@@ -192,7 +259,12 @@ function KontrabonPageContent() {
                   <Filter className="h-4 w-4 text-brand" />
                 <select
                   value={statusFilter}
-                  onChange={(event) => setStatusFilter(event.target.value as KontrabonStatus | "Semua")}
+                  onChange={(event) => {
+                    const value = event.target.value as KontrabonStatus | "Semua";
+                    setStatusFilter(value);
+                    updateParams({ status: value });
+                    persistFilters({ status: value });
+                  }}
                   className="h-12 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-inter"
                 >
                   <option value="Semua">Semua status</option>
@@ -203,7 +275,12 @@ function KontrabonPageContent() {
                 </select>
                 <select
                   value={vendorFilter}
-                  onChange={(event) => setVendorFilter(event.target.value)}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setVendorFilter(value);
+                    updateParams({ vendor: value });
+                    persistFilters({ vendor: value });
+                  }}
                   className="h-12 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-inter"
                 >
                   {vendors.map((vendor) => (
@@ -214,7 +291,12 @@ function KontrabonPageContent() {
                 </select>
                 <select
                   value={brandFilter}
-                  onChange={(event) => setBrandFilter(event.target.value)}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setBrandFilter(value);
+                    updateParams({ brand: value });
+                    persistFilters({ brand: value });
+                  }}
                   className="h-12 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-inter"
                 >
                   {brands.map((brand) => (
@@ -225,7 +307,12 @@ function KontrabonPageContent() {
                 </select>
                 <select
                   value={periodFilter}
-                  onChange={(event) => setPeriodFilter(event.target.value)}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setPeriodFilter(value);
+                    updateParams({ period: value });
+                    persistFilters({ period: value });
+                  }}
                   className="h-12 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-inter"
                 >
                   {periods.map((period) => (
@@ -236,7 +323,12 @@ function KontrabonPageContent() {
                 </select>
                 <select
                   value={sortBy}
-                  onChange={(event) => setSortBy(event.target.value as "due" | "amount")}
+                  onChange={(event) => {
+                    const value = event.target.value as "due" | "amount";
+                    setSortBy(value);
+                    updateParams({ sort: value });
+                    persistFilters({ sort: value });
+                  }}
                   className="h-12 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-inter"
                 >
                   <option value="due">Urutkan: due date</option>
@@ -245,12 +337,14 @@ function KontrabonPageContent() {
                 <button
                   type="button"
                   onClick={() => {
-                    setQuery("");
+                    setSearchQuery("");
                     setStatusFilter("Semua");
                     setVendorFilter("Semua");
                     setBrandFilter("Semua");
                     setPeriodFilter("Semua");
                     setSortBy("due");
+                    updateParams({ search: "", status: "Semua", vendor: "Semua", brand: "Semua", period: "Semua", sort: "due" });
+                    persistFilters({ search: "", status: "Semua", vendor: "Semua", brand: "Semua", period: "Semua", sort: "due" });
                   }}
                   className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#CDEEE8] bg-[#F3FFFC] text-brand-dark"
                   aria-label="Reset filter"
@@ -265,7 +359,31 @@ function KontrabonPageContent() {
           </motion.div>
 
           <div className="space-y-4">
-            {filtered.length === 0 && (
+            {loadState === "error" && (
+              <div className="rounded-[24px] border border-dashed border-red-200 bg-white/90 p-8 text-center shadow-sm">
+                <p className="text-lg font-poppins text-ink">
+                  Gagal memuat kontrabon.
+                </p>
+                <p className="mt-2 text-sm text-muted-foreground font-inter">
+                  Coba muat ulang.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => resetMockLoad(KONTRABON_MOCK_KEY, 700, false)}
+                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-inter text-white"
+                >
+                  Coba lagi
+                </button>
+              </div>
+            )}
+            {loadState === "loading" && (
+              <>
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <KontrabonCardSkeleton key={index} />
+                ))}
+              </>
+            )}
+            {loadState === "ready" && filtered.length === 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -281,12 +399,14 @@ function KontrabonPageContent() {
                 <button
                   type="button"
                   onClick={() => {
-                    setQuery("");
+                    setSearchQuery("");
                     setStatusFilter("Semua");
                     setVendorFilter("Semua");
                     setBrandFilter("Semua");
                     setPeriodFilter("Semua");
                     setSortBy("due");
+                    updateParams({ search: "", status: "Semua", vendor: "Semua", brand: "Semua", period: "Semua", sort: "due" });
+                    persistFilters({ search: "", status: "Semua", vendor: "Semua", brand: "Semua", period: "Semua", sort: "due" });
                   }}
                   className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-inter text-white"
                 >
@@ -294,7 +414,7 @@ function KontrabonPageContent() {
                 </button>
               </motion.div>
             )}
-            {filtered.map((item, index) => (
+            {loadState === "ready" && filtered.map((item, index) => (
               <motion.div
                 key={item.id}
                 initial={{ opacity: 0, y: 12 }}

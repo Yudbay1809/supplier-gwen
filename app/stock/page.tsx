@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useDeferredValue, useMemo, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
 import { Boxes, ArrowLeft, RefreshCcw, Search, ShieldCheck, ShieldX, Store, Warehouse } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -9,6 +9,8 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import AuthGuard from "../components/AuthGuard";
 import { stockData, type StockVariant } from "../data/stock";
+import { BrandCardSkeleton, SummaryCardSkeleton } from "../components/LoadingSkeleton";
+import { getMockLoadState, initMockLoad, resetMockLoad, subscribeMockLoad } from "../lib/mockLoaders";
 
 const statusStyle: Record<StockVariant["status"], { bg: string; text: string }> = {
   Aman: { bg: "bg-brand-soft", text: "text-brand-dark" },
@@ -16,13 +18,34 @@ const statusStyle: Record<StockVariant["status"], { bg: string; text: string }> 
   Habis: { bg: "bg-danger-soft", text: "text-danger" },
 };
 
+const STOCK_MOCK_KEY = "stock";
+initMockLoad(STOCK_MOCK_KEY, 700, false);
+
 function StockPageContent() {
   const searchParams = useSearchParams();
-  const [query, setQuery] = useState(() => searchParams.get("search") ?? "");
-  const [brandFilter, setBrandFilter] = useState(() => searchParams.get("brand") ?? "Semua");
-  const [statusFilter, setStatusFilter] = useState<StockVariant["status"] | "Semua">("Semua");
-  const [warehouseFilter, setWarehouseFilter] = useState("Semua");
-  const [sortBy, setSortBy] = useState<"qty-asc" | "qty-desc">("qty-asc");
+  const storedFilters = (() => {
+    if (typeof window === "undefined") return {};
+    try {
+      return JSON.parse(localStorage.getItem("stock_filters") || "{}");
+    } catch {
+      return {};
+    }
+  })();
+  const [query, setQuery] = useState(() => searchParams.get("search") ?? storedFilters.search ?? "");
+  const [brandFilter, setBrandFilter] = useState(() => searchParams.get("brand") ?? storedFilters.brand ?? "Semua");
+  const [statusFilter, setStatusFilter] = useState<StockVariant["status"] | "Semua">(
+    () => (searchParams.get("status") as StockVariant["status"]) ?? storedFilters.status ?? "Semua"
+  );
+  const [warehouseFilter, setWarehouseFilter] = useState(() => searchParams.get("warehouse") ?? storedFilters.warehouse ?? "Semua");
+  const [sortBy, setSortBy] = useState<"qty-asc" | "qty-desc">(
+    () => (searchParams.get("sort") as "qty-asc" | "qty-desc") ?? storedFilters.sort ?? "qty-asc"
+  );
+  const deferredQuery = useDeferredValue(query);
+  const loadState = useSyncExternalStore(
+    (listener) => subscribeMockLoad(STOCK_MOCK_KEY, listener),
+    () => getMockLoadState(STOCK_MOCK_KEY),
+    () => "loading"
+  );
 
   const filteredBrands = useMemo(() => {
     const brands = brandFilter === "Semua" ? stockData : stockData.filter((item) => item.brand === brandFilter);
@@ -30,7 +53,7 @@ function StockPageContent() {
       const variants = brand.variants.filter((variant) => {
         const matchesQuery = `${variant.sku} ${variant.variant} ${variant.warehouse}`
           .toLowerCase()
-          .includes(query.toLowerCase());
+          .includes(deferredQuery.toLowerCase());
         const matchesStatus = statusFilter === "Semua" ? true : variant.status === statusFilter;
         const matchesWarehouse = warehouseFilter === "Semua" ? true : variant.warehouse === warehouseFilter;
         return matchesQuery && matchesStatus && matchesWarehouse;
@@ -46,7 +69,7 @@ function StockPageContent() {
         variants: sortedVariants,
       };
     });
-  }, [query, brandFilter, statusFilter, warehouseFilter, sortBy]);
+  }, [deferredQuery, brandFilter, statusFilter, warehouseFilter, sortBy]);
 
   const brandOptions = ["Semua", ...stockData.map((item) => item.brand)];
   const warehouseOptions = ["Semua", ...Array.from(new Set(stockData.flatMap((item) => item.variants.map((v) => v.warehouse))))];
@@ -66,6 +89,33 @@ function StockPageContent() {
         ? <mark key={`${part}-${index}`} className="rounded bg-[#D7FFF4] px-1 text-ink">{part}</mark>
         : <span key={`${part}-${index}`}>{part}</span>
     ));
+  };
+
+  const updateParams = (updates: Record<string, string>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    Object.entries(updates).forEach(([key, value]) => {
+      if (!value || value === "Semua") {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    });
+    const next = params.toString();
+    const url = next ? `/stock?${next}` : "/stock";
+    window.history.replaceState(null, "", url);
+  };
+
+  const persistFilters = (next: Record<string, string>) => {
+    if (typeof window === "undefined") return;
+    const payload = {
+      search: query,
+      brand: brandFilter,
+      status: statusFilter,
+      warehouse: warehouseFilter,
+      sort: sortBy,
+      ...next,
+    };
+    localStorage.setItem("stock_filters", JSON.stringify(payload));
   };
 
   return (
@@ -99,6 +149,14 @@ function StockPageContent() {
             transition={{ duration: 0.4, delay: 0.05 }}
             className="mb-6 grid gap-4 md:grid-cols-3"
           >
+            {loadState !== "ready" ? (
+              <>
+                <SummaryCardSkeleton />
+                <SummaryCardSkeleton />
+                <SummaryCardSkeleton />
+              </>
+            ) : (
+              <>
             <div className="rounded-[24px] bg-white/90 p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <p className="text-xs uppercase tracking-[0.2em] text-brand-dark font-inter">Total brand</p>
@@ -144,6 +202,8 @@ function StockPageContent() {
                 Terhubung
               </span>
             </div>
+              </>
+            )}
           </motion.div>
 
           <motion.div
@@ -152,6 +212,14 @@ function StockPageContent() {
             transition={{ duration: 0.4, delay: 0.1 }}
             className="mb-6 grid gap-4 md:grid-cols-3"
           >
+            {loadState !== "ready" ? (
+              <>
+                <SummaryCardSkeleton />
+                <SummaryCardSkeleton />
+                <SummaryCardSkeleton />
+              </>
+            ) : (
+              <>
             <div className="rounded-[24px] bg-white/90 p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <p className="text-xs uppercase tracking-[0.2em] text-brand-dark font-inter">Status aman</p>
@@ -197,6 +265,8 @@ function StockPageContent() {
                 Habis
               </span>
             </div>
+              </>
+            )}
           </motion.div>
 
           <motion.div
@@ -211,7 +281,12 @@ function StockPageContent() {
                 <input
                   type="text"
                   value={query}
-                  onChange={(event) => setQuery(event.target.value)}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setQuery(value);
+                    updateParams({ search: value });
+                    persistFilters({ search: value });
+                  }}
                   placeholder="Cari SKU, varian, atau gudang..."
                   className="h-12 w-full rounded-2xl border border-gray-200 bg-white pl-11 pr-4 text-sm font-inter"
                 />
@@ -219,8 +294,13 @@ function StockPageContent() {
               <div className="relative flex-1 min-w-0">
                 <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pr-8">
                   <select
-                    value={brandFilter}
-                    onChange={(event) => setBrandFilter(event.target.value)}
+                  value={brandFilter}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setBrandFilter(value);
+                    updateParams({ brand: value });
+                    persistFilters({ brand: value });
+                  }}
                     className="h-12 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-inter"
                   >
                   {brandOptions.map((brand) => (
@@ -231,7 +311,12 @@ function StockPageContent() {
                 </select>
                 <select
                   value={statusFilter}
-                  onChange={(event) => setStatusFilter(event.target.value as StockVariant["status"] | "Semua")}
+                  onChange={(event) => {
+                    const value = event.target.value as StockVariant["status"] | "Semua";
+                    setStatusFilter(value);
+                    updateParams({ status: value });
+                    persistFilters({ status: value });
+                  }}
                   className="h-12 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-inter"
                 >
                   <option value="Semua">Semua status</option>
@@ -241,7 +326,12 @@ function StockPageContent() {
                 </select>
                 <select
                   value={warehouseFilter}
-                  onChange={(event) => setWarehouseFilter(event.target.value)}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setWarehouseFilter(value);
+                    updateParams({ warehouse: value });
+                    persistFilters({ warehouse: value });
+                  }}
                   className="h-12 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-inter"
                 >
                   {warehouseOptions.map((warehouse) => (
@@ -251,8 +341,13 @@ function StockPageContent() {
                   ))}
                 </select>
                   <select
-                    value={sortBy}
-                    onChange={(event) => setSortBy(event.target.value as "qty-asc" | "qty-desc")}
+                  value={sortBy}
+                  onChange={(event) => {
+                    const value = event.target.value as "qty-asc" | "qty-desc";
+                    setSortBy(value);
+                    updateParams({ sort: value });
+                    persistFilters({ sort: value });
+                  }}
                     className="h-12 rounded-2xl border border-gray-200 bg-white px-4 text-sm font-inter"
                   >
                     <option value="qty-asc">Urutkan: qty terendah</option>
@@ -266,6 +361,8 @@ function StockPageContent() {
                       setStatusFilter("Semua");
                       setWarehouseFilter("Semua");
                       setSortBy("qty-asc");
+                      updateParams({ search: "", brand: "Semua", status: "Semua", warehouse: "Semua", sort: "qty-asc" });
+                      persistFilters({ search: "", brand: "Semua", status: "Semua", warehouse: "Semua", sort: "qty-asc" });
                     }}
                     className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#CDEEE8] bg-[#F3FFFC] text-brand-dark"
                     aria-label="Reset filter"
@@ -280,7 +377,31 @@ function StockPageContent() {
           </motion.div>
 
           <div className="space-y-6">
-            {filteredBrands.every((brand) => brand.variants.length === 0) && (
+            {loadState === "error" && (
+              <div className="rounded-[24px] border border-dashed border-red-200 bg-white/90 p-8 text-center shadow-sm">
+                <p className="text-lg font-poppins text-ink">
+                  Gagal memuat data stok.
+                </p>
+                <p className="mt-2 text-sm text-muted-foreground font-inter">
+                  Coba muat ulang.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => resetMockLoad(STOCK_MOCK_KEY, 700, false)}
+                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-inter text-white"
+                >
+                  Coba lagi
+                </button>
+              </div>
+            )}
+            {loadState === "loading" && (
+              <>
+                {Array.from({ length: 2 }).map((_, index) => (
+                  <BrandCardSkeleton key={index} />
+                ))}
+              </>
+            )}
+            {loadState === "ready" && filteredBrands.every((brand) => brand.variants.length === 0) && (
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -295,7 +416,7 @@ function StockPageContent() {
                 </p>
               </motion.div>
             )}
-            {filteredBrands.map((brand, index) => {
+            {loadState === "ready" && filteredBrands.map((brand, index) => {
               const brandSource = stockData.find((item) => item.brand === brand.brand) ?? brand;
               const statusCounts = brandSource.variants.reduce(
                 (acc, variant) => {
