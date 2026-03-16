@@ -24,6 +24,7 @@ import { kontrabonData, type KontrabonStatus } from "../data/kontrabon";
 import { KontrabonCardSkeleton, SummaryCardSkeleton } from "../components/LoadingSkeleton";
 import { getMockLoadState, initMockLoad, resetMockLoad, subscribeMockLoad } from "../lib/mockLoaders";
 import PageMotion from "../components/PageMotion";
+import { pushNotification } from "../lib/notifications";
 
 const statusStyle: Record<KontrabonStatus, { bg: string; text: string }> = {
   Draft: { bg: "bg-teal-soft", text: "text-teal" },
@@ -511,7 +512,17 @@ function KontrabonPageContent() {
                         Unduh PDF
                       </Link>
                       {(item.status === "Draft" || item.status === "Proses") && (
-                        <button className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-xs font-inter text-white">
+                        <button
+                          onClick={() =>
+                            pushNotification({
+                              title: "Approval diajukan",
+                              message: `Kontrabon ${item.id} menunggu approval.`,
+                              type: "warning",
+                              href: `/kontrabon/${item.id}`,
+                            })
+                          }
+                          className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-xs font-inter text-white"
+                        >
                           Ajukan Approval
                         </button>
                       )}

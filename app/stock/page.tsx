@@ -12,6 +12,7 @@ import { stockData, type StockVariant } from "../data/stock";
 import { BrandCardSkeleton, SummaryCardSkeleton } from "../components/LoadingSkeleton";
 import { getMockLoadState, initMockLoad, resetMockLoad, subscribeMockLoad } from "../lib/mockLoaders";
 import PageMotion from "../components/PageMotion";
+import { pushNotification } from "../lib/notifications";
 
 const statusStyle: Record<StockVariant["status"], { bg: string; text: string }> = {
   Aman: { bg: "bg-brand-soft", text: "text-brand-dark" },
@@ -509,6 +510,14 @@ function StockPageContent() {
                       <Link
                         key={variant.sku}
                         href={`/stock/${variant.sku}`}
+                        onClick={() =>
+                          pushNotification({
+                            title: "Cek detail stok",
+                            message: `Membuka ${variant.sku} di ${variant.warehouse}.`,
+                            type: "info",
+                            href: `/stock/${variant.sku}`,
+                          })
+                        }
                         className="grid grid-cols-4 gap-3 border-t border-gray-100 px-4 py-3 text-sm transition hover:bg-[#F7FFFD]"
                       >
                         <span className="font-inter text-ink">{highlightText(variant.sku, query)}</span>

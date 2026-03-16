@@ -43,8 +43,10 @@ import { quickActionIconMap, statIconMap, timelineIconMap } from "../lib/iconMap
 import { ImageWithFallback } from "../components/ImageWithFallback";
 import AuthGuard from "../components/AuthGuard";
 import PageMotion from "../components/PageMotion";
+import { supplierProfiles } from "../data/supplier";
 
 export default function DashboardPage() {
+  const supplier = supplierProfiles[0];
   const featuredRacks = racks.slice(0, 3);
   const recentBookings = mockBookings.slice(0, 2);
   const activeSpotlight = featuredRacks[0];
@@ -160,6 +162,14 @@ export default function DashboardPage() {
                 <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white/85">
                   <LayoutDashboard className="h-4 w-4" />
                   Dashboard supplier
+                </div>
+                <div className="mb-3 flex flex-wrap items-center gap-2 text-xs font-inter">
+                  <span className="badge badge-brand">Brand fokus: {supplier.brandFocus}</span>
+                  {supplier.warehouses.map((warehouse) => (
+                    <span key={warehouse} className="badge badge-teal">
+                      {warehouse}
+                    </span>
+                  ))}
                 </div>
                 <h1 className="mb-3 text-3xl font-poppins sm:text-4xl">
                   Selamat datang kembali, BeautyBrand.

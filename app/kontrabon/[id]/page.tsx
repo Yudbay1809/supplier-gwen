@@ -5,6 +5,7 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import AuthGuard from "../../components/AuthGuard";
 import { kontrabonData, type KontrabonStatus } from "../../data/kontrabon";
+import { approvalHistories } from "../../data/approvals";
 
 const statusStyle: Record<KontrabonStatus, { bg: string; text: string }> = {
   Draft: { bg: "bg-teal-soft", text: "text-teal" },
@@ -18,6 +19,7 @@ const timelineIconClass = "h-4 w-4";
 
 export default function KontrabonDetailPage({ params }: { params: { id: string } }) {
   const item = kontrabonData.find((entry) => entry.id === params.id);
+  const approval = approvalHistories.find((entry) => entry.kontrabonId === params.id);
 
   return (
     <AuthGuard>
@@ -179,6 +181,45 @@ export default function KontrabonDetailPage({ params }: { params: { id: string }
                       Lihat daftar kontrabon
                     </Link>
                   </div>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.15 }}
+                className="rounded-[24px] bg-white/90 p-5 shadow-sm"
+              >
+                <p className="text-xs uppercase tracking-[0.2em] text-brand-dark font-inter">Riwayat approval</p>
+                <div className="mt-4 space-y-3">
+                  {(approval?.steps ?? []).map((step) => {
+                    const tone = step.status === "done"
+                      ? "badge badge-brand"
+                      : step.status === "rejected"
+                      ? "badge badge-danger"
+                      : "badge badge-gold";
+                    return (
+                      <div key={step.title} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[#F7FFFD] p-4">
+                        <div>
+                          <p className="font-poppins text-ink">{step.title}</p>
+                          <p className="text-xs text-muted-foreground font-inter">
+                            {step.actor}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs text-muted-foreground font-inter">{step.date}</span>
+                          <span className={tone}>
+                            {step.status === "done" ? "Selesai" : step.status === "rejected" ? "Ditolak" : "Pending"}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {!approval && (
+                    <div className="rounded-2xl bg-[#F7FFFD] p-4 text-sm text-muted-foreground font-inter">
+                      Belum ada riwayat approval.
+                    </div>
+                  )}
                 </div>
               </motion.div>
             </div>

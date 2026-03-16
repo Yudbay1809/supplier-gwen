@@ -3,3 +3,9 @@ export function logError(error: unknown, context: string) {
     console.error(`[${context}]`, error);
   }
 }
+
+export function logEvent(event: string, payload?: Record<string, unknown>) {
+  if (typeof window !== "undefined") {
+    console.info(`[event] ${event}`, payload ?? {});
+  }
+}
