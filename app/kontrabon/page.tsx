@@ -23,6 +23,7 @@ import AuthGuard from "../components/AuthGuard";
 import { kontrabonData, type KontrabonStatus } from "../data/kontrabon";
 import { KontrabonCardSkeleton, SummaryCardSkeleton } from "../components/LoadingSkeleton";
 import { getMockLoadState, initMockLoad, resetMockLoad, subscribeMockLoad } from "../lib/mockLoaders";
+import PageMotion from "../components/PageMotion";
 
 const statusStyle: Record<KontrabonStatus, { bg: string; text: string }> = {
   Draft: { bg: "bg-teal-soft", text: "text-teal" },
@@ -140,6 +141,7 @@ function KontrabonPageContent() {
       <div className="min-h-screen bg-[#F2FFFD]">
         <Navbar />
 
+        <PageMotion>
         <div className="mx-auto max-w-[1100px] px-4 py-8 sm:px-8 lg:px-10">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -527,6 +529,7 @@ function KontrabonPageContent() {
             ))}
           </div>
         </div>
+        </PageMotion>
 
         <Footer />
       </div>

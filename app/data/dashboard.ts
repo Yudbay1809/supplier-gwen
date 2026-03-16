@@ -43,7 +43,7 @@ export const stockCriticalItems = [
   },
   {
     sku: "LM-SPF-01",
-    name: "Lumière Sunscreen Gel SPF50",
+    name: "Lumiere Sunscreen Gel SPF50",
     brand: "Lumiere",
     brandInitials: "LM",
     brandTone: "indigo",
@@ -132,5 +132,29 @@ export const campaignTimeline = [
     date: "12 Apr 2026",
     icon: "Clock",
     tone: "muted",
+  },
+];
+
+export const insightCards = [
+  {
+    title: "Prediksi stok kritis",
+    detail: "2 varian diperkirakan habis dalam 14 hari.",
+    action: "Lihat rekomendasi",
+    href: "/stock",
+    tone: "danger",
+  },
+  {
+    title: "Kontrabon tertunda",
+    detail: "1 kontrabon pending > 7 hari perlu follow-up.",
+    action: "Cek kontrabon",
+    href: "/kontrabon",
+    tone: "gold",
+  },
+  {
+    title: "Efektivitas promosi",
+    detail: "2 media promosi berada di atas performa rata-rata.",
+    action: "Lihat promosi",
+    href: "/promosi",
+    tone: "brand",
   },
 ];

@@ -36,11 +36,13 @@ import {
   stockCriticalItems,
   quickActions,
   statCards,
+  insightCards,
 } from "../data/dashboard";
 import { buildDashboardSearchResults, highlightText } from "../lib/dashboardSearch";
 import { quickActionIconMap, statIconMap, timelineIconMap } from "../lib/iconMap";
 import { ImageWithFallback } from "../components/ImageWithFallback";
 import AuthGuard from "../components/AuthGuard";
+import PageMotion from "../components/PageMotion";
 
 export default function DashboardPage() {
   const featuredRacks = racks.slice(0, 3);
@@ -50,6 +52,8 @@ export default function DashboardPage() {
   const totalBookings = mockBookings.length;
   const totalSpent = mockBookings.reduce((sum, booking) => sum + booking.totalPrice, 0);
   const [period, setPeriod] = useState("Bulan ini");
+  const [activeTrendIndex, setActiveTrendIndex] = useState<number | null>(null);
+  const [activeStockTrendIndex, setActiveStockTrendIndex] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   const statValues: Record<string, string> = {
@@ -88,6 +92,7 @@ export default function DashboardPage() {
       <div className="min-h-screen bg-[#F2FFFD]">
         <Navbar />
 
+        <PageMotion>
         <div className="mx-auto max-w-[1440px] px-4 py-8 sm:px-8 lg:px-[120px]">
           <div className="sticky top-20 z-40 mb-6 rounded-[24px] border border-white/80 bg-white/90 p-4 shadow-sm backdrop-blur">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -312,6 +317,29 @@ export default function DashboardPage() {
                         })
                         .join(" ")}
                     />
+                    {trendData.map((value, index) => {
+                      const x = (index / (trendData.length - 1)) * 300 + 10;
+                      const y = 130 - (value / 80) * 100;
+                      return (
+                        <circle
+                          key={`trend-${index}`}
+                          cx={x}
+                          cy={y}
+                          r={activeTrendIndex === index ? 5 : 3}
+                          className="fill-brand"
+                          onMouseEnter={() => setActiveTrendIndex(index)}
+                          onMouseLeave={() => setActiveTrendIndex(null)}
+                        />
+                      );
+                    })}
+                    {activeTrendIndex !== null && (
+                      <g>
+                        <rect x="190" y="6" width="115" height="40" rx="10" fill="#ffffff" stroke="#E5E7EB" />
+                        <text x="200" y="28" fontSize="10" fill="#0E5E56">
+                          {trendLabels[activeTrendIndex]}: {trendData[activeTrendIndex]}
+                        </text>
+                      </g>
+                    )}
                     <polygon
                       fill="url(#trendFill)"
                       points={[
@@ -334,32 +362,59 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-white/80 bg-white/90 p-6 shadow-sm">
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-brand-dark">Aktivitas terbaru</p>
-                  <h3 className="font-poppins text-ink">Timeline aktivitas</h3>
-                </div>
-                <Link href="/notifications" className="text-xs font-inter text-brand-dark">
-                  Lihat detail
-                </Link>
-              </div>
-              <div className="space-y-4">
-                {activityFeed.map((item) => (
-                  <div key={item.title} className="rounded-2xl bg-[#F3FFFC] p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="font-poppins text-ink">{item.title}</p>
-                      <span className="text-xs text-muted-foreground font-inter">
-                        {item.time}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-sm text-muted-foreground font-inter">
-                      {item.detail}
-                    </p>
+              <div className="rounded-[28px] border border-white/80 bg-white/90 p-6 shadow-sm">
+                <div className="mb-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-brand-dark">Aktivitas terbaru</p>
+                    <h3 className="font-poppins text-ink">Timeline aktivitas</h3>
                   </div>
-                ))}
+                  <Link href="/notifications" className="text-xs font-inter text-brand-dark">
+                    Lihat detail
+                  </Link>
+                </div>
+                <div className="space-y-4">
+                  {activityFeed.map((item) => (
+                    <div key={item.title} className="rounded-2xl bg-[#F3FFFC] p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="font-poppins text-ink">{item.title}</p>
+                        <span className="text-xs text-muted-foreground font-inter">
+                          {item.time}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-sm text-muted-foreground font-inter">
+                        {item.detail}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
+
+          <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+            {insightCards.map((item, index) => {
+              const toneClasses: Record<string, string> = {
+                danger: "badge badge-danger",
+                gold: "badge badge-gold",
+                brand: "badge badge-brand",
+              };
+              return (
+                <motion.div
+                  key={item.title}
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.15 + index * 0.05 }}
+                  className="rounded-[24px] border border-white/80 bg-white/90 p-5 shadow-sm"
+                >
+                  <div className={toneClasses[item.tone]}>
+                    {item.title}
+                  </div>
+                  <p className="mt-3 text-sm text-muted-foreground font-inter">{item.detail}</p>
+                  <Link href={item.href} className="mt-4 inline-flex text-sm font-inter text-brand">
+                    {item.action}
+                  </Link>
+                </motion.div>
+              );
+            })}
           </div>
 
           <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_0.9fr]">
@@ -398,6 +453,29 @@ export default function DashboardPage() {
                         })
                         .join(" ")}
                     />
+                    {stockTrendData.map((value, index) => {
+                      const x = (index / (stockTrendData.length - 1)) * 300 + 10;
+                      const y = 110 - (value / 80) * 90;
+                      return (
+                        <circle
+                          key={`stock-${index}`}
+                          cx={x}
+                          cy={y}
+                          r={activeStockTrendIndex === index ? 5 : 3}
+                          className="fill-brand"
+                          onMouseEnter={() => setActiveStockTrendIndex(index)}
+                          onMouseLeave={() => setActiveStockTrendIndex(null)}
+                        />
+                      );
+                    })}
+                    {activeStockTrendIndex !== null && (
+                      <g>
+                        <rect x="190" y="6" width="115" height="40" rx="10" fill="#ffffff" stroke="#E5E7EB" />
+                        <text x="200" y="28" fontSize="10" fill="#0E5E56">
+                          {stockTrendLabels[activeStockTrendIndex]}: {stockTrendData[activeStockTrendIndex]}
+                        </text>
+                      </g>
+                    )}
                     <polygon
                       fill="url(#stockFill)"
                       points={[
@@ -726,6 +804,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+        </PageMotion>
 
         <Footer />
       </div>

@@ -11,6 +11,7 @@ import AuthGuard from "../components/AuthGuard";
 import { stockData, type StockVariant } from "../data/stock";
 import { BrandCardSkeleton, SummaryCardSkeleton } from "../components/LoadingSkeleton";
 import { getMockLoadState, initMockLoad, resetMockLoad, subscribeMockLoad } from "../lib/mockLoaders";
+import PageMotion from "../components/PageMotion";
 
 const statusStyle: Record<StockVariant["status"], { bg: string; text: string }> = {
   Aman: { bg: "bg-brand-soft", text: "text-brand-dark" },
@@ -123,6 +124,7 @@ function StockPageContent() {
       <div className="min-h-screen bg-[#F2FFFD]">
         <Navbar />
 
+        <PageMotion>
         <div className="mx-auto max-w-[1100px] px-4 py-8 sm:px-8 lg:px-10">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -537,6 +539,7 @@ function StockPageContent() {
             })}
           </div>
         </div>
+        </PageMotion>
 
         <Footer />
       </div>

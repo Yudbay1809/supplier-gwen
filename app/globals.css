@@ -159,6 +159,26 @@ h4 {
     border-radius: var(--radius-pill);
   }
 
+  .badge {
+    @apply inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-inter;
+  }
+
+  .badge-brand {
+    @apply bg-brand-soft text-brand-dark;
+  }
+
+  .badge-gold {
+    @apply bg-gold-soft text-gold;
+  }
+
+  .badge-danger {
+    @apply bg-danger-soft text-danger;
+  }
+
+  .badge-teal {
+    @apply bg-teal-soft text-teal;
+  }
+
   .brand-button {
     background: var(--primary);
     color: var(--primary-foreground);
