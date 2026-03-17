@@ -211,12 +211,16 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <div className="hidden items-center gap-6 md:ml-6 md:flex">
+        <div className="hidden items-center gap-6 md:ml-6 md:flex group">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`text-sm font-inter transition-colors ${isActive(item.href) ? "text-brand font-semibold" : "text-ink hover:text-brand-dark"}`}
+              className={`relative text-sm font-inter transition-all duration-200 group-hover:opacity-60 hover:opacity-100 hover:scale-[1.04] ${
+                isActive(item.href)
+                  ? "text-brand font-semibold after:scale-x-100"
+                  : "text-ink hover:text-brand-dark"
+              } after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-full after:origin-left after:scale-x-0 after:rounded-full after:bg-brand after:transition-transform after:duration-200 hover:after:scale-x-100 hover:-translate-y-0.5`}
             >
               {item.label}
             </Link>

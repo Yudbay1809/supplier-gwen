@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Calendar,
   Download,
@@ -44,6 +44,7 @@ import { ImageWithFallback } from "../components/ImageWithFallback";
 import AuthGuard from "../components/AuthGuard";
 import PageMotion from "../components/PageMotion";
 import { supplierProfiles } from "../data/supplier";
+import InstallHint from "../components/InstallHint";
 
 export default function DashboardPage() {
   const supplier = supplierProfiles[0];
@@ -57,6 +58,7 @@ export default function DashboardPage() {
   const [activeTrendIndex, setActiveTrendIndex] = useState<number | null>(null);
   const [activeStockTrendIndex, setActiveStockTrendIndex] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [welcomeText, setWelcomeText] = useState("");
 
   const statValues: Record<string, string> = {
     "Promosi Aktif": String(activeCount),
@@ -74,6 +76,19 @@ export default function DashboardPage() {
 
 
   const searchResults = useMemo(() => buildDashboardSearchResults(searchQuery, racks), [searchQuery]);
+
+  useEffect(() => {
+    const fullText = "Selamat datang kembali, BeautyBrand.";
+    let index = 0;
+    const interval = window.setInterval(() => {
+      index += 1;
+      setWelcomeText(fullText.slice(0, index));
+      if (index >= fullText.length) {
+        window.clearInterval(interval);
+      }
+    }, 35);
+    return () => window.clearInterval(interval);
+  }, []);
 
   const renderHighlight = (text: string) => {
     const highlight = highlightText(text, searchQuery);
@@ -96,7 +111,8 @@ export default function DashboardPage() {
 
         <PageMotion>
         <div className="mx-auto max-w-[1440px] px-4 py-8 sm:px-8 lg:px-[120px]">
-          <div className="sticky top-20 z-40 mb-6 rounded-[24px] border border-white/80 bg-white/90 p-4 shadow-sm backdrop-blur">
+          <InstallHint />
+          <div className="sticky top-20 z-40 mb-8 rounded-[24px] border border-white/80 bg-white/90 p-4 shadow-sm backdrop-blur">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-brand-dark">Pencarian global</p>
@@ -119,7 +135,7 @@ export default function DashboardPage() {
                   <button
                     key={label}
                     onClick={() => setPeriod(label)}
-                    className={`rounded-full border px-3 py-2 text-xs font-inter ${period === label ? "bg-brand-light text-brand-dark border-[#CDEEE8]" : "bg-white text-[#0E5E56] border-[#F0F0F0]"}`}
+                    className={`filter-pill rounded-full border px-3 py-2 text-xs font-inter transition-transform duration-200 hover:-translate-y-0.5 ${period === label ? "bg-brand-light text-brand-dark border-[#CDEEE8]" : "bg-white text-[#0E5E56] border-[#F0F0F0]"}`}
                   >
                     {label}
                   </button>
@@ -152,6 +168,7 @@ export default function DashboardPage() {
               )}
             </div>
           )}
+
           <motion.div
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -172,7 +189,8 @@ export default function DashboardPage() {
                   ))}
                 </div>
                 <h1 className="mb-3 text-3xl font-poppins sm:text-4xl">
-                  Selamat datang kembali, BeautyBrand.
+                  {welcomeText}
+                  <span className="inline-block w-[6px] animate-pulse text-white/80">|</span>
                 </h1>
                 <p
                   className="max-w-2xl text-sm font-inter leading-7 text-white/80 sm:text-base"
@@ -221,7 +239,7 @@ export default function DashboardPage() {
             </div>
           </motion.div>
 
-          <div className="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {statCards.map((stat, index) => (
               <motion.div
                 key={stat.label}
@@ -239,7 +257,7 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div className="rounded-[28px] border border-white/80 bg-white/90 p-6 shadow-sm">
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -291,223 +309,63 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="grid gap-4">
+              {insightCards.map((item, index) => {
+                const toneClasses: Record<string, string> = {
+                  danger: "badge badge-danger",
+                  gold: "badge badge-gold",
+                  brand: "badge badge-brand",
+                };
+                return (
+                  <motion.div
+                    key={item.title}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.15 + index * 0.05 }}
+                    className="rounded-[24px] border border-white/80 bg-white/90 p-5 shadow-sm"
+                  >
+                    <div className={toneClasses[item.tone]}>
+                      {item.title}
+                    </div>
+                    <p className="mt-3 text-sm text-muted-foreground font-inter">{item.detail}</p>
+                    <Link href={item.href} className="mt-4 inline-flex text-sm font-inter text-brand">
+                      {item.action}
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </div>
+
             <div className="rounded-[28px] border border-white/80 bg-white/90 p-6 shadow-sm">
               <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-brand-dark">Tren kontrabon</p>
-                  <h3 className="font-poppins text-ink">Nilai kontrabon per bulan</h3>
+                  <p className="text-xs uppercase tracking-[0.2em] text-brand-dark">Aktivitas terbaru</p>
+                  <h3 className="font-poppins text-ink">Timeline aktivitas</h3>
                 </div>
-                <LineChart className="h-5 w-5 text-brand" />
+                <Link href="/notifications" className="text-xs font-inter text-brand-dark">
+                  Lihat detail
+                </Link>
               </div>
-              <div className="rounded-2xl bg-[#F7FFFD] p-4">
-                <div className="relative h-40 w-full">
-                  <svg viewBox="0 0 320 140" className="h-full w-full">
-                    <defs>
-                      <linearGradient id="trendStroke" x1="0" x2="1" y1="0" y2="0">
-                        <stop offset="0%" stopColor="#2EC9B7" />
-                        <stop offset="100%" stopColor="#2E9AA2" />
-                      </linearGradient>
-                      <linearGradient id="trendFill" x1="0" x2="0" y1="0" y2="1">
-                        <stop offset="0%" stopColor="rgba(46,201,183,0.35)" />
-                        <stop offset="100%" stopColor="rgba(46,201,183,0)" />
-                      </linearGradient>
-                    </defs>
-                    <polyline
-                      fill="none"
-                      stroke="url(#trendStroke)"
-                      strokeWidth="4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      points={trendData
-                        .map((value, index) => {
-                          const x = (index / (trendData.length - 1)) * 300 + 10;
-                          const y = 130 - (value / 80) * 100;
-                          return `${x},${y}`;
-                        })
-                        .join(" ")}
-                    />
-                    {trendData.map((value, index) => {
-                      const x = (index / (trendData.length - 1)) * 300 + 10;
-                      const y = 130 - (value / 80) * 100;
-                      return (
-                        <circle
-                          key={`trend-${index}`}
-                          cx={x}
-                          cy={y}
-                          r={activeTrendIndex === index ? 5 : 3}
-                          className="fill-brand"
-                          onMouseEnter={() => setActiveTrendIndex(index)}
-                          onMouseLeave={() => setActiveTrendIndex(null)}
-                        />
-                      );
-                    })}
-                    {activeTrendIndex !== null && (
-                      <g>
-                        <rect x="190" y="6" width="115" height="40" rx="10" fill="#ffffff" stroke="#E5E7EB" />
-                        <text x="200" y="28" fontSize="10" fill="#0E5E56">
-                          {trendLabels[activeTrendIndex]}: {trendData[activeTrendIndex]}
-                        </text>
-                      </g>
-                    )}
-                    <polygon
-                      fill="url(#trendFill)"
-                      points={[
-                        ...trendData.map((value, index) => {
-                          const x = (index / (trendData.length - 1)) * 300 + 10;
-                          const y = 130 - (value / 80) * 100;
-                          return `${x},${y}`;
-                        }),
-                        "310,130",
-                        "10,130",
-                      ].join(" ")}
-                    />
-                  </svg>
-                </div>
-                <div className="mt-3 flex justify-between text-xs text-muted-foreground font-inter">
-                  {trendLabels.map((label) => (
-                    <span key={label}>{label}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-              <div className="rounded-[28px] border border-white/80 bg-white/90 p-6 shadow-sm">
-                <div className="mb-4 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.2em] text-brand-dark">Aktivitas terbaru</p>
-                    <h3 className="font-poppins text-ink">Timeline aktivitas</h3>
-                  </div>
-                  <Link href="/notifications" className="text-xs font-inter text-brand-dark">
-                    Lihat detail
-                  </Link>
-                </div>
-                <div className="space-y-4">
-                  {activityFeed.map((item) => (
-                    <div key={item.title} className="rounded-2xl bg-[#F3FFFC] p-4">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="font-poppins text-ink">{item.title}</p>
-                        <span className="text-xs text-muted-foreground font-inter">
-                          {item.time}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-sm text-muted-foreground font-inter">
-                        {item.detail}
-                      </p>
+              <div className="space-y-4">
+                {activityFeed.map((item) => (
+                  <div key={item.title} className="rounded-2xl bg-[#F3FFFC] p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="font-poppins text-ink">{item.title}</p>
+                      <span className="text-xs text-muted-foreground font-inter">
+                        {item.time}
+                      </span>
                     </div>
-                  ))}
-                </div>
+                    <p className="mt-1 text-sm text-muted-foreground font-inter">
+                      {item.detail}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
-
-          <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {insightCards.map((item, index) => {
-              const toneClasses: Record<string, string> = {
-                danger: "badge badge-danger",
-                gold: "badge badge-gold",
-                brand: "badge badge-brand",
-              };
-              return (
-                <motion.div
-                  key={item.title}
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.15 + index * 0.05 }}
-                  className="rounded-[24px] border border-white/80 bg-white/90 p-5 shadow-sm"
-                >
-                  <div className={toneClasses[item.tone]}>
-                    {item.title}
-                  </div>
-                  <p className="mt-3 text-sm text-muted-foreground font-inter">{item.detail}</p>
-                  <Link href={item.href} className="mt-4 inline-flex text-sm font-inter text-brand">
-                    {item.action}
-                  </Link>
-                </motion.div>
-              );
-            })}
           </div>
 
-          <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="rounded-[28px] border border-white/80 bg-white/90 p-6 shadow-sm">
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-brand-dark">Insight singkat</p>
-                  <h3 className="font-poppins text-ink">Trend stok per bulan</h3>
-                </div>
-                <TrendingUp className="h-5 w-5 text-brand" />
-              </div>
-              <div className="rounded-2xl bg-[#F7FFFD] p-4">
-                <div className="relative h-28 w-full">
-                  <svg viewBox="0 0 320 120" className="h-full w-full">
-                    <defs>
-                      <linearGradient id="stockStroke" x1="0" x2="1" y1="0" y2="0">
-                        <stop offset="0%" stopColor="#2EC9B7" />
-                        <stop offset="100%" stopColor="#2E9AA2" />
-                      </linearGradient>
-                      <linearGradient id="stockFill" x1="0" x2="0" y1="0" y2="1">
-                        <stop offset="0%" stopColor="rgba(46,201,183,0.3)" />
-                        <stop offset="100%" stopColor="rgba(46,201,183,0)" />
-                      </linearGradient>
-                    </defs>
-                    <polyline
-                      fill="none"
-                      stroke="url(#stockStroke)"
-                      strokeWidth="4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      points={stockTrendData
-                        .map((value, index) => {
-                          const x = (index / (stockTrendData.length - 1)) * 300 + 10;
-                          const y = 110 - (value / 80) * 90;
-                          return `${x},${y}`;
-                        })
-                        .join(" ")}
-                    />
-                    {stockTrendData.map((value, index) => {
-                      const x = (index / (stockTrendData.length - 1)) * 300 + 10;
-                      const y = 110 - (value / 80) * 90;
-                      return (
-                        <circle
-                          key={`stock-${index}`}
-                          cx={x}
-                          cy={y}
-                          r={activeStockTrendIndex === index ? 5 : 3}
-                          className="fill-brand"
-                          onMouseEnter={() => setActiveStockTrendIndex(index)}
-                          onMouseLeave={() => setActiveStockTrendIndex(null)}
-                        />
-                      );
-                    })}
-                    {activeStockTrendIndex !== null && (
-                      <g>
-                        <rect x="190" y="6" width="115" height="40" rx="10" fill="#ffffff" stroke="#E5E7EB" />
-                        <text x="200" y="28" fontSize="10" fill="#0E5E56">
-                          {stockTrendLabels[activeStockTrendIndex]}: {stockTrendData[activeStockTrendIndex]}
-                        </text>
-                      </g>
-                    )}
-                    <polygon
-                      fill="url(#stockFill)"
-                      points={[
-                        ...stockTrendData.map((value, index) => {
-                          const x = (index / (stockTrendData.length - 1)) * 300 + 10;
-                          const y = 110 - (value / 80) * 90;
-                          return `${x},${y}`;
-                        }),
-                        "310,110",
-                        "10,110",
-                      ].join(" ")}
-                    />
-                  </svg>
-                </div>
-                <div className="mt-3 flex justify-between text-xs text-muted-foreground font-inter">
-                  {stockTrendLabels.map((label) => (
-                    <span key={label}>{label}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
+          <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
             <div className="rounded-[28px] border border-white/80 bg-white/90 p-6 shadow-sm">
               <div className="mb-4 flex items-center justify-between">
                 <div>
@@ -557,7 +415,7 @@ export default function DashboardPage() {
                           <div>
                             <p className="font-poppins text-ink">{item.name}</p>
                             <p className="text-xs text-muted-foreground font-inter">
-                              {item.brand} • {item.sku} • {item.warehouse}
+                              {item.brand} - {item.sku} - {item.warehouse}
                             </p>
                           </div>
                         </div>
@@ -573,6 +431,88 @@ export default function DashboardPage() {
                     </Link>
                   );
                 })}
+              </div>
+            </div>
+
+            <div className="rounded-[28px] border border-white/80 bg-white/90 p-6 shadow-sm">
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.2em] text-brand-dark">Insight singkat</p>
+                  <h3 className="font-poppins text-ink">Trend stok per bulan</h3>
+                </div>
+                <TrendingUp className="h-5 w-5 text-brand" />
+              </div>
+              <div className="rounded-2xl bg-[#F7FFFD] p-4">
+                <div className="relative h-28 w-full">
+                  <svg viewBox="0 0 320 120" className="h-full w-full">
+                    <defs>
+                      <linearGradient id="stockStroke" x1="0" x2="1" y1="0" y2="0">
+                        <stop offset="0%" stopColor="#2EC9B7" />
+                        <stop offset="100%" stopColor="#2E9AA2" />
+                      </linearGradient>
+                      <linearGradient id="stockFill" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0%" stopColor="rgba(46,201,183,0.3)" />
+                        <stop offset="100%" stopColor="rgba(46,201,183,0)" />
+                      </linearGradient>
+                    </defs>
+                    <polyline
+                      fill="none"
+                      stroke="url(#stockStroke)"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="chart-line"
+                      points={stockTrendData
+                        .map((value, index) => {
+                          const x = (index / (stockTrendData.length - 1)) * 300 + 10;
+                          const y = 110 - (value / 80) * 90;
+                          return `${x},${y}`;
+                        })
+                        .join(" ")}
+                    />
+                    {stockTrendData.map((value, index) => {
+                      const x = (index / (stockTrendData.length - 1)) * 300 + 10;
+                      const y = 110 - (value / 80) * 90;
+                      return (
+                        <circle
+                          key={`stock-${index}`}
+                          cx={x}
+                          cy={y}
+                          r={activeStockTrendIndex === index ? 5 : 3}
+                          className="fill-brand"
+                          onMouseEnter={() => setActiveStockTrendIndex(index)}
+                          onMouseLeave={() => setActiveStockTrendIndex(null)}
+                        />
+                      );
+                    })}
+                    {activeStockTrendIndex !== null && (
+                      <g>
+                        <rect x="190" y="6" width="115" height="40" rx="10" fill="#ffffff" stroke="#E5E7EB" />
+                        <text x="200" y="28" fontSize="10" fill="#0E5E56">
+                          {stockTrendLabels[activeStockTrendIndex]}: {stockTrendData[activeStockTrendIndex]}
+                        </text>
+                      </g>
+                    )}
+                    <polygon
+                      fill="url(#stockFill)"
+                      className="chart-fill"
+                      points={[
+                        ...stockTrendData.map((value, index) => {
+                          const x = (index / (stockTrendData.length - 1)) * 300 + 10;
+                          const y = 110 - (value / 80) * 90;
+                          return `${x},${y}`;
+                        }),
+                        "310,110",
+                        "10,110",
+                      ].join(" ")}
+                    />
+                  </svg>
+                </div>
+                <div className="mt-3 flex justify-between text-xs text-muted-foreground font-inter">
+                  {stockTrendLabels.map((label) => (
+                    <span key={label}>{label}</span>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

@@ -77,9 +77,6 @@ export default function RootLayout({
         <a href="#main-content" className="skip-link">
           Lewati ke konten utama
         </a>
-        <div className="install-hint">
-          Tambahkan ke layar utama untuk akses cepat.
-        </div>
         <main id="main-content">
           {children}
         </main>

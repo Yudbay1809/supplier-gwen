@@ -31,6 +31,14 @@
   --radius-pill: 999px;
   --shadow-soft: 0 18px 48px rgba(46, 201, 183, 0.14);
   --shadow-float: 0 24px 60px rgba(14, 94, 86, 0.18);
+  --badge-brand-bg: #f3fffc;
+  --badge-brand-text: #1c8f84;
+  --badge-gold-bg: #fff6e6;
+  --badge-gold-text: #c9a24a;
+  --badge-teal-bg: #e8f7f5;
+  --badge-teal-text: #2e9aa2;
+  --badge-danger-bg: #fee2e2;
+  --badge-danger-text: #b91c1c;
 }
 
 body {
@@ -152,17 +160,14 @@ h4 {
   }
 
   .install-hint {
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    margin: 12px auto 0;
+    margin: 0 0 16px;
     width: fit-content;
-    padding: 8px 14px;
+    padding: 6px 12px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.9);
     color: #0e5e56;
     font-size: 12px;
-    box-shadow: 0 12px 28px rgba(46, 201, 183, 0.16);
+    box-shadow: 0 10px 22px rgba(46, 201, 183, 0.16);
   }
 
   .page-wrap {
@@ -195,23 +200,23 @@ h4 {
   }
 
   .badge-brand {
-    background-color: #f3fffc;
-    color: #1c8f84;
+    background-color: var(--badge-brand-bg);
+    color: var(--badge-brand-text);
   }
 
   .badge-gold {
-    background-color: #fff6e6;
-    color: #c9a24a;
+    background-color: var(--badge-gold-bg);
+    color: var(--badge-gold-text);
   }
 
   .badge-danger {
-    background-color: #fee2e2;
-    color: #b91c1c;
+    background-color: var(--badge-danger-bg);
+    color: var(--badge-danger-text);
   }
 
   .badge-teal {
-    background-color: #e8f7f5;
-    color: #2e9aa2;
+    background-color: var(--badge-teal-bg);
+    color: var(--badge-teal-text);
   }
 
   .brand-button {
@@ -288,5 +293,57 @@ h4 {
   .bg-danger-soft {
     background-color: #fee2e2;
   }
+}
+
+@keyframes chart-draw {
+  from {
+    stroke-dashoffset: 420;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes chart-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chart-line {
+  stroke-dasharray: 420;
+  stroke-dashoffset: 420;
+  animation: chart-draw 1.2s ease forwards;
+}
+
+.chart-fill {
+  opacity: 0;
+  animation: chart-fade 0.9s ease forwards;
+  animation-delay: 0.2s;
+}
+
+.filter-pill {
+  position: relative;
+  overflow: hidden;
+}
+
+.filter-pill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(46, 201, 183, 0.22), rgba(46, 201, 183, 0));
+  opacity: 0;
+  transform: translateX(-60%);
+  transition: transform 240ms ease, opacity 240ms ease;
+}
+
+.filter-pill:hover::after {
+  opacity: 1;
+  transform: translateX(0);
 }
 
