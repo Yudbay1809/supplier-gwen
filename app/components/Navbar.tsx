@@ -18,6 +18,7 @@ import { AUTH_EVENT, isAuthed, logout } from "../lib/auth";
 import Image from "next/image";
 import { stockData } from "../data/stock";
 import { kontrabonData } from "../data/kontrabon";
+import { trackEvent } from "../lib/analytics";
 
 export default function Navbar() {
   const router = useRouter();
@@ -50,6 +51,7 @@ export default function Navbar() {
   const handleSearch = (value?: string) => {
     const raw = (value ?? searchQuery).trim();
     if (!raw) return;
+    trackEvent("global_search", { query: raw });
     const query = raw.toLowerCase();
 
     const skuMatch = stockData

@@ -13,6 +13,7 @@ import { BrandCardSkeleton, SummaryCardSkeleton } from "../components/LoadingSke
 import { getMockLoadState, initMockLoad, resetMockLoad, subscribeMockLoad } from "../lib/mockLoaders";
 import PageMotion from "../components/PageMotion";
 import { pushNotification } from "../lib/notifications";
+import { trackEvent } from "../lib/analytics";
 
 const statusStyle: Record<StockVariant["status"], { bg: string; text: string }> = {
   Aman: { bg: "bg-brand-soft", text: "text-brand-dark" },
@@ -287,6 +288,7 @@ function StockPageContent() {
                   onChange={(event) => {
                     const value = event.target.value;
                     setQuery(value);
+                    trackEvent("filter_stock_search", { value });
                     updateParams({ search: value });
                     persistFilters({ search: value });
                   }}
@@ -301,6 +303,7 @@ function StockPageContent() {
                   onChange={(event) => {
                     const value = event.target.value;
                     setBrandFilter(value);
+                    trackEvent("filter_stock_brand", { value });
                     updateParams({ brand: value });
                     persistFilters({ brand: value });
                   }}
@@ -317,6 +320,7 @@ function StockPageContent() {
                   onChange={(event) => {
                     const value = event.target.value as StockVariant["status"] | "Semua";
                     setStatusFilter(value);
+                    trackEvent("filter_stock_status", { value });
                     updateParams({ status: value });
                     persistFilters({ status: value });
                   }}
@@ -332,6 +336,7 @@ function StockPageContent() {
                   onChange={(event) => {
                     const value = event.target.value;
                     setWarehouseFilter(value);
+                    trackEvent("filter_stock_warehouse", { value });
                     updateParams({ warehouse: value });
                     persistFilters({ warehouse: value });
                   }}
@@ -348,6 +353,7 @@ function StockPageContent() {
                   onChange={(event) => {
                     const value = event.target.value as "qty-asc" | "qty-desc";
                     setSortBy(value);
+                    trackEvent("filter_stock_sort", { value });
                     updateParams({ sort: value });
                     persistFilters({ sort: value });
                   }}

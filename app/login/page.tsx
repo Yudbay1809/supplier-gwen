@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, Lock, Mail, ShieldCheck, Sparkles, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { login } from "../lib/auth";
+import { trackEvent } from "../lib/analytics";
 
 function LoginPageContent() {
   const router = useRouter();
@@ -15,6 +16,7 @@ function LoginPageContent() {
   const handleLogin = (event: React.FormEvent) => {
     event.preventDefault();
     login(email);
+    trackEvent("login", { email });
     const next = searchParams.get("next");
     const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
     router.push(safeNext || "/dashboard");

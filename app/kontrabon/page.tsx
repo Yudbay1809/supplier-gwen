@@ -25,6 +25,7 @@ import { KontrabonCardSkeleton, SummaryCardSkeleton } from "../components/Loadin
 import { getMockLoadState, initMockLoad, resetMockLoad, subscribeMockLoad } from "../lib/mockLoaders";
 import PageMotion from "../components/PageMotion";
 import { pushNotification } from "../lib/notifications";
+import { trackEvent } from "../lib/analytics";
 
 const statusStyle: Record<KontrabonStatus, { bg: string; text: string }> = {
   Draft: { bg: "bg-teal-soft", text: "text-teal" },
@@ -250,6 +251,7 @@ function KontrabonPageContent() {
                   onChange={(event) => {
                     const value = event.target.value;
                     setSearchQuery(value);
+                    trackEvent("filter_kontrabon_search", { value });
                     updateParams({ search: value });
                     persistFilters({ search: value });
                   }}
@@ -265,6 +267,7 @@ function KontrabonPageContent() {
                   onChange={(event) => {
                     const value = event.target.value as KontrabonStatus | "Semua";
                     setStatusFilter(value);
+                    trackEvent("filter_kontrabon_status", { value });
                     updateParams({ status: value });
                     persistFilters({ status: value });
                   }}
@@ -281,6 +284,7 @@ function KontrabonPageContent() {
                   onChange={(event) => {
                     const value = event.target.value;
                     setVendorFilter(value);
+                    trackEvent("filter_kontrabon_vendor", { value });
                     updateParams({ vendor: value });
                     persistFilters({ vendor: value });
                   }}
@@ -297,6 +301,7 @@ function KontrabonPageContent() {
                   onChange={(event) => {
                     const value = event.target.value;
                     setBrandFilter(value);
+                    trackEvent("filter_kontrabon_brand", { value });
                     updateParams({ brand: value });
                     persistFilters({ brand: value });
                   }}
@@ -313,6 +318,7 @@ function KontrabonPageContent() {
                   onChange={(event) => {
                     const value = event.target.value;
                     setPeriodFilter(value);
+                    trackEvent("filter_kontrabon_period", { value });
                     updateParams({ period: value });
                     persistFilters({ period: value });
                   }}
@@ -329,6 +335,7 @@ function KontrabonPageContent() {
                   onChange={(event) => {
                     const value = event.target.value as "due" | "amount";
                     setSortBy(value);
+                    trackEvent("filter_kontrabon_sort", { value });
                     updateParams({ sort: value });
                     persistFilters({ sort: value });
                   }}

@@ -190,23 +190,28 @@ h4 {
   }
 
   .badge {
-    @apply inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-inter;
+    @apply inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs;
+    font-family: var(--font-inter), system-ui, sans-serif;
   }
 
   .badge-brand {
-    @apply bg-brand-soft text-brand-dark;
+    background-color: #f3fffc;
+    color: #1c8f84;
   }
 
   .badge-gold {
-    @apply bg-gold-soft text-gold;
+    background-color: #fff6e6;
+    color: #c9a24a;
   }
 
   .badge-danger {
-    @apply bg-danger-soft text-danger;
+    background-color: #fee2e2;
+    color: #b91c1c;
   }
 
   .badge-teal {
-    @apply bg-teal-soft text-teal;
+    background-color: #e8f7f5;
+    color: #2e9aa2;
   }
 
   .brand-button {
