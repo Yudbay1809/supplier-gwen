@@ -112,7 +112,7 @@ export default function DashboardPage() {
         <PageMotion>
         <div className="mx-auto max-w-[1440px] px-4 py-8 sm:px-8 lg:px-[120px]">
           <InstallHint />
-          <div className="sticky top-20 z-40 mb-8 rounded-[24px] border border-white/80 bg-white/90 p-4 shadow-sm backdrop-blur">
+          <div className="search-bar-anim sticky top-20 z-40 mb-8 rounded-[24px] border border-white/80 bg-white/90 p-4 shadow-sm backdrop-blur">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-brand-dark">Pencarian global</p>
